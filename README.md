@@ -1,4 +1,4 @@
-# CreditRiskAssessment# Credit Risk Assessment Using Bayesian Networks
+# Credit Risk Assessment Using Bayesian Networks
 
 ## Overview
 This project leverages Bayesian Networks to model and infer credit risk based on customer attributes such as income level, experience, home ownership, and car ownership. The solution includes data preprocessing, model training, and inference capabilities to predict "HighRisk" or "LowRisk" classifications.
@@ -9,24 +9,40 @@ This project leverages Bayesian Networks to model and infer credit risk based on
 - **Inference**: Supports Variable Elimination, Belief Propagation, and Likelihood Weighting for single and batch predictions.
 
 ## Installation
-1. **Dependencies**:  
-   Ensure Python 3.8+ is installed. Install required packages:  
-   ```bash
-   pip install pgmpy pandas numpy argparse
 
-   Repository Structure:
-   ├── data/credit_risk_dataset.csv   # Raw credit risk data
-├── learn.py                       # Script to preprocess data and train the model
-├── inference.py                   # Script to perform inference
+1. **Setup Python environment**  
+   Ensure you have Python 3.8+ installed. It is recommended to use a virtual environment or Anaconda.
+
+2. **Install required packages**  
+   Run the following commands to install dependencies:
+   ```bash
+   pip install pgmpy pandas numpy matplotlib networkx flask argparse
+
+## Repository Structure
+CreditRiskAssessment/
+├── data/
+│   └── credit_risk_dataset.csv     # Raw credit risk data
+├── learn.py                        # Script to preprocess data and train the model
+├── inference.py                    # Script to perform inference
+├── plot_bn.py                     # Script to visualize Bayesian Network graph
+├── generate_samples.py             # Script to generate synthetic samples using the model
+├── flask_app.py                    # Minimal Flask web app for interactive inference
 ├── cpds.pkl                       # Generated CPTs after running learn.py
 └── README.md                      # Project documentation
 
-Usage:
-
-Train the Model:
-bash
+## Usage
+**Train the Model**
 python learn.py
-Single Inference:
+This will load data, preprocess it, learn the CPDs, and save them in cpds.pkl.
+**Visualize the Bayesian Network Graph**
+python plot_bn.py
+This opens a window displaying the network structure.
+**Generate Synthetic Samples**
+python generate_samples.py
+Prints synthetic data samples with predicted Risk_Flag values.
+**Perform Inference**
+Single Inference via Command Line
+Specify all evidence variables and algorithm:
 python inference.py \
   --algorithm ve \
   --income-level Medium \
@@ -34,76 +50,40 @@ python inference.py \
   --house-ownership Yes \
   --car-ownership No
 
-  Batch Inference:
-  Save input data as batch.csv with columns: Income_Level,Experience_Level,House_Ownership,Car_Ownership. Run:
-  python inference.py --algorithm ve --batch-file batch.csv
+*Supported algorithms:*
+ve — Variable Elimination (exact inference)
+bp — Belief Propagation (approximate)
+lw — Likelihood Weighting (sampling-based with confidence intervals)
 
-License
-© 2025 [Organization Name]. Proprietary and confidential.
+*Batch Inference with CSV Input*
+Prepare a CSV file batch.csv with columns:
+Income_Level,Experience_Level,House_Ownership,Car_Ownership
+Medium,Mid,Yes,No
+High,Senior,No,Unknown
 
----
+*Run batch inference:*
+python inference.py --algorithm ve --batch-file batch.csv
+The output will be a CSV printed to the console with probability results.
 
-**report.md**  
-```markdown
-# Credit Risk Assessment Using Bayesian Networks: Technical Report
+**Run the Flask Web App for Interactive Inference**
+Install Flask:
+pip install Flask
+Run the app:
+python flask_app.py
 
-## 1. Introduction
-This project addresses credit risk prediction using Bayesian Networks. The goal is to infer the probability of a customer defaulting (Risk_Flag) based on financial and demographic attributes.
+Open your browser at http://127.0.0.1:5000/ and use the form to input evidence and select inference algorithms.
 
-## 2. Domain and Problem Statement
-**Domain**: Financial Services (Credit Risk Prediction).  
-**Problem**: Traditional credit scoring methods lack transparency in probabilistic reasoning. Bayesian Networks provide a interpretable framework to model dependencies between risk factors.
+## Notes
+Ensure cpds.pkl exists by running learn.py before inference.
 
-## 3. Data and Preprocessing
-- **Dataset**: `credit_risk_dataset.csv` containing customer profiles and loan details.
-- **Preprocessing**:  
-  - Discretized `Income` into Low (<50k), Medium (50k–100k), and High (>100k).  
-  - Discretized `Experience` into Junior (<2 years), Mid (2–5 years), and Senior (>5 years).  
-  - Mapped binary flags (`House_Ownership`, `Car_Ownership`) to "Yes"/"No".  
+The inference script requires all evidence variables for single inference mode.
 
-## 4. Bayesian Network Design
-### Structure
-- **Nodes**: `Income_Level`, `Experience_Level`, `House_Ownership`, `Car_Ownership` (parents) → `Risk_Flag` (child).  
-- **Edges**: Direct dependencies from attributes to Risk_Flag.  
+Visualization depends on networkx and matplotlib.
 
-![Bayesian Network Diagram](diagram.png)  
-*Diagram: All parent nodes influence the target variable Risk_Flag.*
+## License
+MIT License
 
-### Conditional Probability Tables (CPTs)
-- **Priors**: Learned from data using Maximum Likelihood Estimation.  
-- **Posteriors**: Validated for normalization (sum to 1 ± 1e-6).  
-
-## 5. Inference
-**Algorithms**:  
-1. **Variable Elimination (VE)**: Exact inference for precise probabilities.  
-2. **Belief Propagation (BP)**: Approximate inference for faster results.  
-3. **Likelihood Weighting (LW)**: Sampling-based method with 95% confidence intervals.  
-
-**Example Query**:  
-```python
-P(Risk_Flag | Income_Level=Medium, Experience_Level=Mid, House_Ownership=Yes, Car_Ownership=No)
-
-Implementation
-Tools: pgmpy for modeling, pandas for data handling.
-
-Validation: CPTs checked for probabilistic consistency.
-
-Limitations:
-
-Simplified network structure; domain knowledge could refine edges.
-
-No quantitative accuracy metrics (e.g., ROC-AUC).
-
-Future Work
-Integrate with real-time credit approval systems.
-
-Expand features (e.g., loan history, credit scores).
-
-Validate against ground-truth defaults.
-
-References
+## References
 pgmpy Documentation: https://pgmpy.org
-
 Koller, D., & Friedman, N. (2009). Probabilistic Graphical Models.
-
 Dataset adapted from Kaggle’s Credit Risk Dataset.
